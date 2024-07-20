@@ -28,6 +28,9 @@
 
 namespace metaf {
 
+// Is this float value near-zero? (Avoids trying to convert a float to a bool, which would be equivalent of comparing a float to the absolute number 0.0f, which is unreliable)
+inline bool isZero (float f) { return -0.00001f < f && f < 0.00001f; }
+
 // Metaf library version
 struct Version {
 	inline static const int major = 5;
@@ -202,7 +205,7 @@ private:
 	bool freezing = false;
 	static const Unit tempUnit = Unit::C;
 	bool precise = false; //True = tenth of degrees C, false = degrees C
-	static inline const float preciseValuePrecision = 0.1;
+	static inline const float preciseValuePrecision = 0.1f;
 };
 
 class Speed {
@@ -418,8 +421,8 @@ private:
 	std::optional<float> pressureValue;
 	Unit pressureUnit = Unit::HECTOPASCAL;
 
-	static inline const float inHgDecimalPointShift = 0.01;
-	static inline const float tendencyDecimalPointShift = 0.1;
+	static inline const float inHgDecimalPointShift = 0.01f;
+	static inline const float tendencyDecimalPointShift = 0.1f;
 };
 
 class Precipitation {
@@ -2249,6 +2252,7 @@ public:
 	inline T visit(const GroupInfo & groupInfo) {
 		return visit(groupInfo.group, groupInfo.reportPart, groupInfo.rawString);
 	}
+    inline virtual ~Visitor() {}
 protected:
 	virtual T visitKeywordGroup(
 		const KeywordGroup & group,
@@ -2521,7 +2525,7 @@ std::optional<unsigned int> strToUint(const std::string & str,
 	for (auto [i,c] = std::pair(0u, str.c_str() + startPos); i < digits; i++, c++) {
 		if (*c < '0' || *c > '9') return error;
 		static const auto decimalRadix = 10u;
-		value = value * decimalRadix + (*c - '0');
+		value = value * decimalRadix + (unsigned(*c) - '0');
 	}
 	return value;
 }
@@ -2534,18 +2538,18 @@ std::optional<std::pair<unsigned int, unsigned int> >
 	//Equivalent regex "(\\d\\d?)/(\\d\\d?)"
 	std::optional<std::pair<unsigned int, unsigned int> > error;
 	if (length + startPos > str.length()) length = str.length() - startPos;
-	const int endPos = startPos + length;
+	const std::size_t endPos = startPos + length;
 
 	const auto slashPos = str.find('/', startPos);
 	if (slashPos == std::string::npos) return error;
 
 	static const int minDigits = 1, maxDigits = 2;
 
-	const int numeratorPos = startPos;
-	const int numeratorLength = slashPos - startPos;
+	const std::size_t numeratorPos = startPos;
+	const std::size_t numeratorLength = slashPos - startPos;
 	if (numeratorLength < minDigits || numeratorLength > maxDigits) return error;
-	const int denominatorPos = slashPos + 1;
-	const int denominatorLength = endPos - denominatorPos;
+	const std::size_t denominatorPos = slashPos + 1;
+	const std::size_t denominatorLength = endPos - denominatorPos;
 	if (denominatorLength < minDigits || denominatorLength > maxDigits) return error;
 
 	const auto numerator = strToUint(str, numeratorPos, numeratorLength);
@@ -2713,7 +2717,7 @@ Temperature Temperature::heatIndex(
     	c5 * t * t + c6 * r * r +
     	c7 * t * t * r + c8 * t * r * r + c9 * t * t * r * r;
 
-    return Temperature(heatIndexC);
+    return Temperature(float(heatIndexC));
 }
 
 Temperature Temperature::heatIndex(
@@ -2741,7 +2745,7 @@ Temperature Temperature::windChill(
 		11.37 * pow(*windKmh, 0.16) +
 		0.3965 * *temperatureC * pow(*windKmh, 0.16);
 
-	return Temperature(windChillC);
+	return Temperature(float(windChillC));
 }
 
 std::optional<Temperature> Temperature::fromString(const std::string & s) {
@@ -2774,9 +2778,9 @@ std::optional<Temperature> Temperature::fromRemarkString(const std::string & s) 
 	if (s[0] != '0' && s[0] != '1') return error;
 	const auto t = strToUint(s, 1, 3);
 	if (!t.has_value()) return error;
-	int tValueSigned = *t;
+	int tValueSigned = int(*t);
 	if (s[0] == '1') tValueSigned = -tValueSigned;
-	return Temperature(tValueSigned / 10.0);
+	return Temperature(tValueSigned / 10.0f);
 }
 
 std::optional<float> Temperature::toUnit(Unit unit) const {
@@ -2909,10 +2913,10 @@ std::optional<Distance> Distance::fromMileString(const std::string & s,
 
 	if (s.find('/') == std::string::npos) {
 		//The value is integer, e.g. 3SM or 15SM
-		const int intPos = static_cast<int>(modifier.has_value());
-		const int intLength = s.length() - 
-			(remarkFormat ? 0 : unitLength) - 
-			static_cast<int>(modifier.has_value());
+		const std::size_t intPos = std::size_t(modifier.has_value());
+		const std::size_t intLength = s.length() -
+			(remarkFormat ? 0 : unitLength) -
+            intPos;
 		static const int minDigits = 1, maxDigits = 2;
 		if (intLength < minDigits || intLength > maxDigits) return error;
 		const auto dist = strToUint(s, intPos, intLength);
@@ -2920,12 +2924,13 @@ std::optional<Distance> Distance::fromMileString(const std::string & s,
 		distance.dist = *dist * statuteMileFactor;
 	} else {
 		//Fraction value, e.g. 1/2SM, 11/2SM, 5/16SM, 11/16SM
-		const int fracLength = s.length() - 
-			(remarkFormat ? 0: unitLength) - 
-			static_cast<int>(modifier.has_value());
+        const std::size_t intPos = std::size_t(modifier.has_value());
+		const std::size_t fracLength = s.length() -
+			(remarkFormat ? 0: unitLength) -
+			intPos;
 		const auto fraction = fractionStrToUint(s,
-			static_cast<int>(modifier.has_value()),
-			fracLength);
+                                                intPos,
+                                                fracLength);
 		if (!fraction.has_value()) return error;
 		auto integer = 0u;
 		auto numerator = std::get<0>(*fraction);
@@ -3065,8 +3070,8 @@ std::optional<std::pair<unsigned int, Distance::MilesFraction>> Distance::miles(
 	const auto milesDecimal = toUnit(Unit::STATUTE_MILES);
 	if (!milesDecimal.has_value()) return std::optional<std::pair<unsigned int, Distance::MilesFraction>>();
 	static const unsigned int denominator = 16u;
-	const unsigned int topHeavyNumerator = std::round(*milesDecimal * denominator);
-	switch (topHeavyNumerator) { 
+	const unsigned int topHeavyNumerator = (unsigned int)std::lround(*milesDecimal * denominator);
+	switch (topHeavyNumerator) {
 		case 0:  return std::pair(0u, MilesFraction::NONE);
 		case 1:  return std::pair(0u, MilesFraction::F_1_16);
 		case 2:  return std::pair(0u, MilesFraction::F_1_8);
@@ -3205,7 +3210,7 @@ std::optional<Direction> Direction::fromCardinalString(
 		dir.dirType = Type::UNKNOWN;
 		return dir;
 	}	
-	int cardinalDegrees = 0;
+	unsigned int cardinalDegrees = 0;
 	if (s == "N") cardinalDegrees = degreesTrueNorth;
 	if (s == "W") cardinalDegrees = degreesTrueWest;
 	if (s == "S") cardinalDegrees = degreesTrueSouth;
@@ -4065,12 +4070,12 @@ std::optional<CloudType> CloudType::fromString(const std::string & s) {
 		if (!heightValue->isReported()) return error;
 		const auto typeValue = cloudTypeFromString(s.substr(oktaDigits, typeStrLen));
 		if (typeValue == Type::NOT_REPORTED) return error;
-		return CloudType(typeValue, *heightValue, s[0] - '0');
+		return CloudType(typeValue, *heightValue, unsigned(s[0]) - '0');
 	} else {
 		// Format without height BLSN1 or SC1 (3 or more chars)
 		// std::regex("([A-Z][A-Z]+)(\d)")
 		if (s.length() < 3) return error;
-		const auto oktaCh = s[s.length() - 1];
+		const unsigned char oktaCh = (unsigned char)s[s.length() - 1];
 		if (oktaCh < '0' || oktaCh > '9') return error;
 		const auto typeValue = 
 			cloudTypeOrObscurationFromString(s.substr(0, s.length() - 1));
@@ -4633,9 +4638,9 @@ AppendResult WindGroup::appendPeakWind(const std::string & group,
 	if (!reportMetadata.reportTime.has_value() && match.str(matchHour).empty()) {
 		return AppendResult::GROUP_INVALIDATED;
 	}
-	const auto hour = match.str(matchHour).empty() ?
-		reportMetadata.reportTime->hour() : stoi(match.str(matchHour));
-	const auto minute = stoi(match.str(matchMinute));
+	const unsigned int hour = match.str(matchHour).empty() ?
+		reportMetadata.reportTime->hour() : (unsigned int)stoul(match.str(matchHour));
+	const unsigned int minute = (unsigned int)stoul(match.str(matchMinute));
 	evTime = MetafTime(hour, minute);
 	incompleteText = IncompleteText::NONE;
 
@@ -4678,7 +4683,7 @@ AppendResult WindGroup::appendWindShift(const std::string & group,
 bool WindGroup::isValid() const {
 	if (incompleteText != IncompleteText::NONE) return false;
 	if (!gustSpeed().speed().value_or(1)) return false;
-	if (!height().distance().value_or(1)) return false;
+	if (isZero(height().distance().value_or(1.0f))) return false;
 	if (!runway().value_or(Runway()).isValid()) return false;
 	if (!eventTime().value_or(MetafTime()).isValid()) return false;
 	if (windSpeed().speed().value_or(0) >= gustSpeed().speed().value_or(999)) 
@@ -5406,12 +5411,12 @@ std::optional<WeatherGroup> WeatherGroup::parseWeatherEvent(const std::string & 
 	const MetafTime & reportTime) 
 {
 	std::optional<WeatherGroup> notRecognised;
-	int eventStartPos = 0;
+	std::size_t eventStartPos = 0;
 	bool lastDigit = false;
 	WeatherPhenomena previousWeather;
 	WeatherGroup result;
 	result.t = Type::EVENT;
-	for (auto i = 0u; i < group.length(); i++) {
+	for (std::size_t i = 0; i < group.length(); i++) {
 		// Split group into weather event strings
 		// Assuming that weather event always has digits at the end
 		const bool currDigit = (group[i] >= '0' && group[i] <= '9');
@@ -5453,8 +5458,8 @@ bool TemperatureGroup::isValid() const {
 	if (!airTemperature().temperature().has_value() ||
 		!dewPoint().temperature().has_value()) return true;
 	// If temperature reported M00 then dew point cannot be 00
-	if (!*airTemperature().temperature() &&
-		!*dewPoint().temperature() &&
+	if (isZero(*airTemperature().temperature()) &&
+		isZero(*dewPoint().temperature()) &&
 		airTemperature().isFreezing() &&
 		!dewPoint().isFreezing()) return false;
 	// Generally dew point must be less or equal to temperature
@@ -5989,7 +5994,7 @@ float PrecipitationGroup::factorFromType(Type type) {
 		case Type::WATER_EQUIV_OF_SNOW_ON_GROUND:
 		case Type::SNOW_6_HOURLY:
 		case Type::PRECIPITATION_ACCUMULATION_SINCE_LAST_REPORT:
-		return 0.1;
+		return 0.1f;
 
 		case Type::TOTAL_PRECIPITATION_HOURLY:
 		case Type::FROZEN_PRECIP_3_OR_6_HOURLY:
@@ -5999,7 +6004,7 @@ float PrecipitationGroup::factorFromType(Type type) {
 		case Type::ICE_ACCRETION_FOR_LAST_HOUR:
 		case Type::ICE_ACCRETION_FOR_LAST_3_HOURS:
 		case Type::ICE_ACCRETION_FOR_LAST_6_HOURS:
-		return 0.01;
+		return 0.01f;
 
 		default:
 		return 1;
@@ -6695,10 +6700,10 @@ std::optional<MiscGroup::Type> MiscGroup::parseColourCode(const std::string & gr
 bool MiscGroup::appendHailstoneFraction(const std::string & group) {
 	// Fraction specified with increment of 1/4
 	bool appended = false;
-	auto value = groupData.value_or(0.0);
-	if (group == "1/4") { value += 0.25; appended = true; }
-	if (group == "1/2" || group == "2/4") { value += 0.5; appended = true; }
-	if (group == "3/4") { value += 0.75; appended = true; }
+	float value = groupData.value_or(0.0);
+	if (group == "1/4") { value += 0.25f; appended = true; }
+	if (group == "1/2" || group == "2/4") { value += 0.5f; appended = true; }
+	if (group == "3/4") { value += 0.75f; appended = true; }
 	if (!appended) return false; 
 	groupData = value;
 	incompleteText = IncompleteText::NONE;
