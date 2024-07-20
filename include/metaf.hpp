@@ -2254,73 +2254,72 @@ public:
 	}
     inline virtual ~Visitor() {}
 protected:
-	virtual T visitKeywordGroup(
-		const KeywordGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitLocationGroup(const LocationGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitReportTimeGroup(const ReportTimeGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitTrendGroup(const TrendGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitWindGroup(const WindGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitVisibilityGroup(const VisibilityGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitCloudGroup(const CloudGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitWeatherGroup(const WeatherGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitTemperatureGroup(const TemperatureGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitPressureGroup(const PressureGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitRunwayStateGroup(const RunwayStateGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitSeaSurfaceGroup(const SeaSurfaceGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitMinMaxTemperatureGroup(const MinMaxTemperatureGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitPrecipitationGroup(const PrecipitationGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitLayerForecastGroup(const LayerForecastGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitPressureTendencyGroup(const PressureTendencyGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitCloudTypesGroup(const CloudTypesGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitLowMidHighCloudGroup(const LowMidHighCloudGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitLightningGroup(const LightningGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitVicinityGroup(const VicinityGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitMiscGroup(const MiscGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
-	virtual T visitUnknownGroup(const UnknownGroup & group,
-		ReportPart reportPart,
-		const std::string & rawString) = 0;
+	virtual T visitKeywordGroup([[maybe_unused]] const KeywordGroup & group,
+                                [[maybe_unused]] ReportPart reportPart,
+                                [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitLocationGroup([[maybe_unused]] const LocationGroup & group,
+                                 [[maybe_unused]] ReportPart reportPart,
+                                 [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitReportTimeGroup([[maybe_unused]] const ReportTimeGroup & group,
+                                   [[maybe_unused]] ReportPart reportPart,
+                                   [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitTrendGroup([[maybe_unused]] const TrendGroup & group,
+                              [[maybe_unused]] ReportPart reportPart,
+                              [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitWindGroup([[maybe_unused]] const WindGroup & group,
+                             [[maybe_unused]] ReportPart reportPart,
+                             [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitVisibilityGroup([[maybe_unused]] const VisibilityGroup & group,
+                                   [[maybe_unused]] ReportPart reportPart,
+                                   [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitCloudGroup([[maybe_unused]] const CloudGroup & group,
+                              [[maybe_unused]] ReportPart reportPart,
+                              [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitWeatherGroup([[maybe_unused]] const WeatherGroup & group,
+                                [[maybe_unused]] ReportPart reportPart,
+                                [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitTemperatureGroup([[maybe_unused]] const TemperatureGroup & group,
+                                    [[maybe_unused]] ReportPart reportPart,
+                                    [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitPressureGroup([[maybe_unused]] const PressureGroup & group,
+                                 [[maybe_unused]] ReportPart reportPart,
+                                 [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitRunwayStateGroup([[maybe_unused]] const RunwayStateGroup & group,
+                                    [[maybe_unused]] ReportPart reportPart,
+                                    [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitSeaSurfaceGroup([[maybe_unused]] const SeaSurfaceGroup & group,
+                                   [[maybe_unused]] ReportPart reportPart,
+                                   [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitMinMaxTemperatureGroup([[maybe_unused]] const MinMaxTemperatureGroup & group,
+                                          [[maybe_unused]] ReportPart reportPart,
+                                          [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitPrecipitationGroup([[maybe_unused]] const PrecipitationGroup & group,
+                                      [[maybe_unused]] ReportPart reportPart,
+                                      [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitLayerForecastGroup([[maybe_unused]] const LayerForecastGroup & group,
+                                      [[maybe_unused]] ReportPart reportPart,
+                                      [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitPressureTendencyGroup([[maybe_unused]] const PressureTendencyGroup & group,
+                                         [[maybe_unused]] ReportPart reportPart,
+                                         [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitCloudTypesGroup([[maybe_unused]] const CloudTypesGroup & group,
+                                   [[maybe_unused]] ReportPart reportPart,
+                                   [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitLowMidHighCloudGroup([[maybe_unused]] const LowMidHighCloudGroup & group,
+                                        [[maybe_unused]] ReportPart reportPart,
+                                        [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitLightningGroup([[maybe_unused]] const LightningGroup & group,
+                                  [[maybe_unused]] ReportPart reportPart,
+                                  [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitVicinityGroup([[maybe_unused]] const VicinityGroup & group,
+                                 [[maybe_unused]] ReportPart reportPart,
+                                 [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitMiscGroup([[maybe_unused]] const MiscGroup & group,
+                             [[maybe_unused]] ReportPart reportPart,
+                             [[maybe_unused]] const std::string & rawString) { return T(); }
+	virtual T visitUnknownGroup([[maybe_unused]] const UnknownGroup & group,
+                                [[maybe_unused]] ReportPart reportPart,
+                                [[maybe_unused]] const std::string & rawString) { return T(); }
 };
 
 template <typename T>
