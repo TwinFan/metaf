@@ -1462,7 +1462,7 @@ private:
 	Temperature dp;
 	bool isIncomplete = false;
 
-	TemperatureGroup(Type t, bool i = false) : tp(t), isIncomplete(i) {}
+	TemperatureGroup(Type ty, bool i = false) : tp(ty), isIncomplete(i) {}
 };
 
 class PressureGroup {
@@ -2203,7 +2203,7 @@ private:
 		bool isReparseRequired() {
 			return (state == State::REPORT_BODY_BEGIN_METAR_REPEAT_PARSE);
 		}
-		void setError(ReportError e) { state = State::ERROR; reportError = e; }
+		void setError(ReportError e) { state = State::ERROR_STATE; reportError = e; }
 	private:
 		enum class State {
 			// States of state machine used to check syntax of METAR/TAF reports
@@ -2221,7 +2221,7 @@ private:
 			REMARK_TAF,
 			NIL,
 			CNL,
-			ERROR
+			ERROR_STATE                 // just 'ERROR' seems to conflict with some other ERROR define in other Windows headers
 		};
 
 		void setState(State s) { state = s; }
@@ -6934,7 +6934,7 @@ ReportPart Parser::Status::getReportPart() {
 
 		case State::NIL:
 		case State::CNL:
-		case State::ERROR:
+		case State::ERROR_STATE:
 		return ReportPart::UNKNOWN;
 	}
 }
@@ -6994,7 +6994,7 @@ void Parser::Status::transition(SyntaxGroup group) {
 		break;
 
 		case State::REMARK_METAR:
-		case State::ERROR:
+		case State::ERROR_STATE:
 		break;
 	}
 }
@@ -7182,7 +7182,7 @@ void Parser::Status::finalTransition() {
 		case State::REMARK_TAF:
 		case State::NIL:
 		case State::CNL:
-		case State::ERROR:
+		case State::ERROR_STATE:
 		break;
 
 		case State::REPORT_TYPE_OR_LOCATION:
